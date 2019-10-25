@@ -1,1 +1,1 @@
-# neurosapiens-platform
+# IA-platform

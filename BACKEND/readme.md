@@ -1,6 +1,17 @@
 # AI API
 
 
+
+## Similar platforms
+- [LUCA Suite]()
+- [Big ML](https://bigml.com)
+- [Mind Foundry](https://www.mindfoundry.ai)
+- [Exploratory](https://exploratory.io)
+- [H2O driverless](https://www.h2o.ai/products/h2o-driverless-ai)
+- [Kibana](https://www.elastic.co/es/products/kibana)
+
+
+
 ## 0. API
 - [Create a robust ai rest api](https://medium.com/dataswati-garage/create-a-robust-ai-rest-api-71a8050ce314)
 

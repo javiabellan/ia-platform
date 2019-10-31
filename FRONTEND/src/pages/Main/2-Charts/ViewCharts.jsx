@@ -10,9 +10,8 @@ import Chart     from './Chart.jsx';
 
 export default function ViewCharts()
 {
-
 	return (
-		<Container maxWidth="lg">
+    <Container maxWidth="lg">
       <Grid container spacing={3}>
         <Chart/>
         <Chart/>
@@ -20,7 +19,6 @@ export default function ViewCharts()
         <Chart/>
         <Chart/>
       </Grid>
-
     </Container>
 	);
 }

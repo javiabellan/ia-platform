@@ -44,7 +44,7 @@ export const deleteDataset = (datasetId) => {
 //////////////////////////////////////////////////////////// API_VISUAL
 
 
-export const getDatasets = async (updater) => {
+export const getCharts = async (updater) => {
 	const response = await fetch(API_VISUAL + "vega");
 	const result   = await response.json();
 	updater(result);

@@ -20,7 +20,6 @@ export default function HomePage()
 {
   const [datasets, updateDatasets] = React.useState([]);
   React.useEffect(() => {getDatasets(updateDatasets)}, []);
-  console.log(datasets)
   return (
     <div>
 

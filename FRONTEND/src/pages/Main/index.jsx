@@ -140,7 +140,7 @@ export default function MainPage(props)
         index={value} onChangeIndex={changeIndex}
       >
         <TabPanel value={value} index={0}> <ViewData table={dataset? dataset.data : undefined}/>   </TabPanel>
-        <TabPanel value={value} index={1}> <ViewCharts/> </TabPanel>
+        <TabPanel value={value} index={1}> <ViewCharts datasetID={datasetID}/> </TabPanel>
         <TabPanel value={value} index={2}> <ViewModels/> </TabPanel>
       </SwipeableViews>
 

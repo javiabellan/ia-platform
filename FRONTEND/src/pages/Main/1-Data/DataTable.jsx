@@ -8,7 +8,6 @@ import Button         from '@material-ui/core/Button';
 
 
 export default function DataTable({table}) {
-  console.log(table);
   return (
       <Table size="small">
 

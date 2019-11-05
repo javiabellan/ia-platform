@@ -1,3 +1,7 @@
+# TODO
+# - Microservicios: https://medium.com/@sonusharma.mnnit/building-a-microservice-in-python-ff009da83dac
+
+
 # General imports
 import os
 import json
@@ -5,7 +9,7 @@ import datetime
 
 # Web Server imports
 from flask            import Flask, request, send_from_directory
-from flask_restplus   import Api, Resource
+from flask_restplus   import Api, Resource, reqparse
 from werkzeug         import secure_filename
 from flask_cors       import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -22,7 +26,7 @@ import pickle      # Model storage
 
 FILES_DIR = "files"
 DB_NAME   = "database.db"
-DATAFRAME = -1
+DATAFRAME = None
 
 
 ################################################################ START
@@ -101,20 +105,9 @@ db.session.commit()
 #                              | |                          
 #                              |_|                    
 
-################################################################ HOME
-#
-# @api.route('/')
-# class Home(Resource):
-# 	def get(self):
-# 		return {
-# 			#"flask":             flask.__version__,
-# 			#"flask_sqlalchemy":  flask_sqlalchemy.__version__,
-# 			#"h2o":               h2o.__version__
-# 		}
-
-
 apiDataset = api.namespace('dataset', description='Operations related to dataset')
 apiVisual  = api.namespace('visual',  description='Operations related to visualization')
+
 
 @apiDataset.route("/all")
 class DatasetList(Resource):
@@ -141,7 +134,7 @@ class DatasetList(Resource):
 		name = request.form['name']
 		desc = request.form['desc']
 
-		# TO-DO: Chech that dataset don't exists
+		# TODO: Chech that dataset don't exists
 
 		# Save file in FILES_DIR
 		fileName = secure_filename(file.filename)
@@ -163,31 +156,44 @@ class DatasetList(Resource):
 
 
 
+
+parser = reqparse.RequestParser()
+parser.add_argument('page',   type=int, default=1,  help='Page number')
+parser.add_argument('rows',   type=int, default=10, help='Seen entries per page')
+parser.add_argument('orient', type=str, default='all', choices=('true', 'false', 'all'),
+                                help='Filter list by local status.')
+
+
 #@api.param('id', 'Dataset file name')
 @apiDataset.route('/<string:id>')
 class Dataset(Resource):
 
+	@apiDataset.expect(parser)
 	def get(self, id): ################################ GET DATASET (DATA & METADATA)
 		"""
 		Get 1 dataset by Id (Data & metadata)
 		"""
+		################ Read optional parametes
+		if 'orient' in request.args:
+			orient = request.args.get('orient')
+		else:
+			orient = "split"
+
 		################ Get dataset metadata (From quering database)
-		dataset_metadata = DatasetTable.query.get(id).to_dict()
-
-
-		################ Get dataset data (From reading CSV)
 		global DATAFRAME
-		filePath     = os.path.join(FILES_DIR, dataset_metadata["file"])
-		DATAFRAME    = pandas.read_csv(filePath)
-		#if "head"
-		dataset_data = DATAFRAME.head(15).to_dict(orient='split')
-		#if "wholeDataset":
-		#dataset_data = DATAFRAME.to_dict(orient='records')
+		if DATAFRAME is None:
+			dataset_metadata = DatasetTable.query.get(id).to_dict()
+			filePath         = os.path.join(FILES_DIR, dataset_metadata["file"])
+			DATAFRAME        = pandas.read_csv(filePath)
 
-		return {
-			"metadata": dataset_metadata,
-			"data":     dataset_data
-		}
+		# Used in Data view
+		if   orient=="head":     return DATAFRAME.head(15).round(3).to_dict(orient='split')
+		elif orient=="describe": return DATAFRAME.describe().round(3).to_dict(orient='split')
+		
+		# Used in Chart View
+		elif orient=="vega":     return DATAFRAME.round(3).to_dict(orient='records')
+		elif orient=="metadata": return dataset_metadata
+
 
 
 	def delete(self, id): ################################ DELETE DATASET (DATA & METADATA)
@@ -208,24 +214,6 @@ class Dataset(Resource):
 		return dataset2delete.to_dict()
 
 
-@apiDataset.route('/whole/<string:id>')
-class WholeDataset(Resource):
-
-	def get(self, id): ################################ GET DATASET (DATA & METADATA)
-		"""
-		Get 1 dataset by Id (Data & metadata)
-		"""
-		################ Get dataset metadata (From quering database)
-		dataset_metadata = DatasetTable.query.get(id).to_dict()
-
-
-		################ Get dataset data (From reading CSV)
-		global DATAFRAME
-		filePath     = os.path.join(FILES_DIR, dataset_metadata["file"])
-		DATAFRAME    = pandas.read_csv(filePath)
-		dataset_data = DATAFRAME.to_dict(orient='records')
-
-		return dataset_data
 
 ################################################################ DOWNLOAD FILE
 # @app.route("/download/<file>")
@@ -265,6 +253,7 @@ def get_varTypes(df):
 	types = [t.replace('datetime64[ns]', 'date') for t in types]
 	types = [t.replace('timedelta[ns]',  'date') for t in types]
 	return types
+
 
 
 ################################### AUXILIAR ALTAIR FUNCS
@@ -373,6 +362,8 @@ def prettySize(size):
 if __name__ == "__main__":
 	# Run in production with:
 	# gunicorn -w 4 -b 0.0.0.0:5000 backend:app
+	# or
+	# uwsgi --http :9090 --wsgi-file backend.py --master --processes 4 --threads 2
 	app.run(debug=True, port=5000, host='0.0.0.0')
 
 

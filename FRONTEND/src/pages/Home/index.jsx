@@ -23,7 +23,7 @@ export default function HomePage()
   return (
     <div>
 
-      <AppBar position="static">
+      <AppBar position="sticky">
         <Toolbar>
           <Typography variant="h6">EXPACOM</Typography>
         </Toolbar>

@@ -32,7 +32,7 @@ DATAFRAME = None
 ################################################################ START
 
 app = Flask(__name__)                          # Flask
-api = Api(app, version='0.2', title='BACKEND', # Flask Restplus
+api = Api(app, version='0.3', title='BACKEND', # Flask Restplus
   description = "Backend of EXPACOM in Python with Flask.") 
 CORS(app)                                      # Flask CORS
 
@@ -107,6 +107,7 @@ db.session.commit()
 
 apiDataset = api.namespace('dataset', description='Operations related to dataset')
 apiVisual  = api.namespace('visual',  description='Operations related to visualization')
+apiML      = api.namespace('ml',      description='Operations related to machine learning')
 
 
 @apiDataset.route("/all")
@@ -156,49 +157,42 @@ class DatasetList(Resource):
 
 
 
+args_dataset = reqparse.RequestParser()
+args_dataset.add_argument("data",       type=str, default="top",  choices=("all", "top", "bottom", "subsample", "describe"))
+args_dataset.add_argument("rows",       type=int, default=10)
+args_dataset.add_argument("decimals",   type=int, default=2)
+args_dataset.add_argument("jsonFormat", type=str, default="split", choices=("split", "records"))
 
-parser = reqparse.RequestParser()
-parser.add_argument('page',   type=int, default=1,  help='Page number')
-parser.add_argument('rows',   type=int, default=10, help='Seen entries per page')
-parser.add_argument('orient', type=str, default='all', choices=('true', 'false', 'all'),
-                                help='Filter list by local status.')
-
-
-#@api.param('id', 'Dataset file name')
-@apiDataset.route('/<string:id>')
+@apiDataset.route("/<string:id>")
 class Dataset(Resource):
 
-	@apiDataset.expect(parser)
+	@apiDataset.expect(args_dataset)
 	def get(self, id): ################################ GET DATASET (DATA & METADATA)
 		"""
 		Get 1 dataset by Id (Data & metadata)
 		"""
-		################ Read optional parametes
-		if 'orient' in request.args:
-			orient = request.args.get('orient')
-		else:
-			orient = "split"
+		args = args_dataset.parse_args(request)  #args = request.args
 
-		################ Get dataset metadata (From quering database)
+		################ Get dataset (from quering database)
 		global DATAFRAME
 		if DATAFRAME is None:
 			dataset_metadata = DatasetTable.query.get(id).to_dict()
 			filePath         = os.path.join(FILES_DIR, dataset_metadata["file"])
 			DATAFRAME        = pandas.read_csv(filePath)
 
-		# Used in Data view
-		if   orient=="head":     return DATAFRAME.head(15).round(3).to_dict(orient='split')
-		elif orient=="describe": return DATAFRAME.describe().round(3).to_dict(orient='split')
-		
-		# Used in Chart View
-		elif orient=="vega":     return DATAFRAME.round(3).to_dict(orient='records')
-		elif orient=="metadata": return dataset_metadata
+		################ Transform dataset
+		if   args.data=="all":       DF = DATAFRAME
+		if   args.data=="top":       DF = DATAFRAME.head(args.rows)
+		elif args.data=="bottom":    DF = DATAFRAME.tail(args.rows)
+		elif args.data=="subsample": DF = DATAFRAME.sample(args.rows)
+		elif args.data=="describe":  DF = DATAFRAME.describe()
 
+		return DF.round(args.decimals).to_dict(orient=args.jsonFormat)
 
 
 	def delete(self, id): ################################ DELETE DATASET (DATA & METADATA)
 		"""
-		Delete dataset (CSV_file & Database)
+		Delete dataset (CSV file & Database)
 		"""
 
 		dataset2delete  = DatasetTable.query.get(id)
@@ -256,90 +250,6 @@ def get_varTypes(df):
 
 
 
-################################### AUXILIAR ALTAIR FUNCS
-def chart_base(varName):
-	return alt.Chart().mark_bar().properties(
-		width=300, height=200,
-		title=varName
-	)
-
-def chart_numerical(varName):
-	return chart_base(varName).encode(
-		x=alt.X(varName, type='quantitative', bin=alt.Bin(maxbins=16), title=None),
-		y=alt.Y('count()', axis=None)
-	)
-
-def chart_categorical(varName):
-	return chart_base(varName).encode(
-		x=alt.X('count()', axis=None),
-		y=alt.Y(varName, type='nominal', title=None,
-			sort=alt.EncodingSortField(field=varName, op="count", order="descending")),
-	)
-
-
-
-@apiVisual.route('/univariate')
-class Univariate(Resource):
-
-	def univariate_charts(df, data_url, include_num=True, include_cat=True, include_date=False):
-	    allVarNames = get_varNames(df)
-	    allVarTypes = get_varTypes(df)
-	    
-	    varNames = []
-	    varTypes = []
-	    charts   = []
-	    filters  = []
-	    
-	    # 1) Generate charts and filters
-	    for varName, varType in zip(allVarNames, allVarTypes):
-	        if include_num and varType=="num":
-	            varNames.append(varName)
-	            varTypes.append(varType)
-	            charts.append(chart_numerical(varName))
-	            filters.append(alt.selection_interval(name=varName, encodings=['x']))
-	        elif include_cat and varType=="cat":
-	            varNames.append(varName)
-	            varTypes.append(varType)
-	            charts.append(chart_categorical(varName))
-	            filters.append(alt.selection_multi(name=varName, encodings=['y']))
-	    
-	    # 2) Crossfilter charts
-	    filteredCharts = []
-	    for (chart, myFilter, varName, varType) in zip(charts, filters, varNames, varTypes):
-	        # Colors
-	        if varType=="num":
-	            background = chart.mark_bar(color='teal', opacity=0.15)
-	            highlight  = chart.mark_bar(color='teal')
-
-	        if varType=="cat":
-	            background = chart.mark_bar(color='lightgray')
-	            highlight  = chart.encode(color=varName + ":N")
-
-	        # Add my filter to modify others
-	        background = background.add_selection(myFilter)
-
-	        # Add others filters that modify me
-	        for f in filters: highlight = highlight.transform_filter(f)
-
-	        filteredCharts.append(alt.layer(background, highlight))
-	    
-	    return alt.concat(*filteredCharts, data=data_url, columns=2)
-
-
-	def get(self): ################################ GET CHART
-
-		global DATAFRAME
-		print(type(DATAFRAME))
-		chart = altair.Chart(DATAFRAME).mark_point().encode(
-			x='SepalLength',
-			y='SepalWidth',
-			color='Species'
-		)#.interactive()
-
-		return chart.to_dict()
-
-
-
 
 
 
@@ -381,22 +291,5 @@ if __name__ == "__main__":
 #                                                                               __/ |
 #                                                                              |___/ 
 
-# def df_read(filePath):
-# 	# CHOOSE ONE:
-# 	# dataFrame = h2o.import_file(filePath)  # h2o
-# 	# dataFrame = datatable.fread(filePath)  # datatable
-# 	# dataframe = pandas.read_csv(filePath)  # pandas
 
-# 	return pandas.read_csv(filePath)
-
-
-# def df_head(dataFrame):
-# 	return dataFrame.head(10).to_json(orient='split')
-
-
-# def autoML(df, target, time):
-# 	aml = h2o.automl(max_time_secs=time)
-# 	aml.train(y=target, training_frame=df)
-
-# 	return aml.leaderboard()
 

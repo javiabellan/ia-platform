@@ -9,9 +9,11 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
 import Typography            from '@material-ui/core/Typography';
-import ExpandMoreIcon        from '@material-ui/icons/ExpandMore';
 import Button                from '@material-ui/core/Button';
 //import Divider             from '@material-ui/core/Divider';
+
+import ExpandMoreIcon        from '@material-ui/icons/ExpandMore';
+
 
 // My components
 import ButtonEraseDataset  from './ButtonEraseDataset.jsx';

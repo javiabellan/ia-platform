@@ -4,7 +4,6 @@ import { Link }       from "@reach/router"
 import SwipeableViews from 'react-swipeable-views';
 
 // Material design
-import makeStyles from '@material-ui/core/styles/makeStyles';
 import useTheme   from '@material-ui/core/styles/useTheme';
 import Typography from '@material-ui/core/Typography';
 import AppBar     from '@material-ui/core/AppBar';
@@ -14,8 +13,6 @@ import Tabs       from '@material-ui/core/Tabs';
 import Tab        from '@material-ui/core/Tab';
 import Grid       from '@material-ui/core/Grid';
 import Box        from '@material-ui/core/Box';
-import Fab        from '@material-ui/core/Fab';
-import Zoom       from '@material-ui/core/Zoom';
 
 // Icons
 import ChevronLeft            from 'mdi-material-ui/ChevronLeft';
@@ -25,10 +22,14 @@ import FlaskEmpty             from 'mdi-material-ui/FlaskEmpty'
 import AddIcon                from '@material-ui/icons/Add';
 import EditIcon               from '@material-ui/icons/Edit';
 
-// My views
-import ViewData   from './1-Data/ViewData.jsx';
-import ViewCharts from './2-Charts/ViewCharts.jsx';
-import ViewModels from './3-Models/ViewModels.jsx';
+// My components
+import ZoomFabDialog   from './ZoomFabDialog.jsx';
+import ViewData        from './1-Data/ViewData.jsx';
+import ViewCharts      from './2-Charts/ViewCharts.jsx';
+import ViewModels      from './3-Models/ViewModels.jsx';
+import NewChart        from './2-Charts/NewChart.jsx';
+import NewModel        from './3-Models/NewModel.jsx';
+
 
 // API
 import { getDataset } from '../../services/api';
@@ -53,18 +54,9 @@ function TabPanel(props)
 }
 
 
-const useStyles = makeStyles(theme => ({
-  fab: {
-    position: 'absolute',
-    bottom: theme.spacing(4),
-    right:  theme.spacing(4)
-  }
-}));
-
 
 export default function MainPage(props)
 { 
-  const classes   = useStyles();
   const theme     = useTheme();
 
   // Get dataset data & metadata from API
@@ -77,34 +69,11 @@ export default function MainPage(props)
   function changeTab(event, newValue) {setValue(newValue);}
   function changeIndex(index) {setValue(index);}
 
-  const transitionDuration = {
-    enter: theme.transitions.duration.enteringScreen,
-    exit:  theme.transitions.duration.leavingScreen,
-  };
-
-  const fabs = [
-    {
-      color: 'primary',
-      icon: <EditIcon />,
-      label: 'Edit',
-    },
-    {
-      color: 'secondary',
-      icon: <AddIcon />,
-      label: 'Add',
-    },
-    {
-      color: 'inherit',
-      icon: <AddIcon />,
-      label: 'Add',
-    },
-  ];
 
   return (
     <div>
-      
       {/********************** NAVBAR **********************/}
-      <AppBar position="static">
+      <AppBar position="sticky">
         <Grid container spacing={0}>
 
           {/**** LEFT: Back button & title ****/}
@@ -123,7 +92,7 @@ export default function MainPage(props)
             <Tabs centered value={value} onChange={changeTab}>
               <Tab label="DATOS"    icon={<TableLarge/>} />
               <Tab label="GRÁFICAS" icon={<ChartAreasplineVariant/>} />
-              <Tab label="ANÁLISIS" icon={<FlaskEmpty/>} />
+              <Tab label="MODELOS"  icon={<FlaskEmpty/>} />
             </Tabs>
           </Grid>
 
@@ -145,22 +114,11 @@ export default function MainPage(props)
       </SwipeableViews>
 
 
-      {/********************** FAB BUTTONS **********************/}
-      {fabs.map((fab, index) => (
-        <Zoom
-          key={fab.color}
-          in={value === index}
-          timeout={transitionDuration}
-          style={{
-            transitionDelay: `${value === index ? transitionDuration.exit : 0}ms`,
-          }}
-          unmountOnExit
-        >
-          <Fab className={classes.fab} aria-label={fab.label} color={fab.color}>
-            {fab.icon}
-          </Fab>
-        </Zoom>
-      ))}
+      {/********************** FAB BUTTONS *********************/}
+      <ZoomFabDialog visible={value===0} icon=<EditIcon/> dialog={"Aquí va la edición del dataset en el futuro lejano"} />
+      <ZoomFabDialog visible={value===1} icon=<AddIcon/>  dialog=<NewChart/>  />
+      <ZoomFabDialog visible={value===2} icon=<AddIcon/>  dialog=<NewModel/>  /> 
+
 
     </div>
   );

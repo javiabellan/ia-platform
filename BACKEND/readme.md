@@ -3,13 +3,14 @@
 
 
 ## Similar platforms
-- [LUCA Suite]()
+- LUCA Suite
+  - [video](https://youtu.be/xhoJ1OB3x5M?t=1740)
 - [Big ML](https://bigml.com)
 - [Mind Foundry](https://www.mindfoundry.ai)
 - [Exploratory](https://exploratory.io)
 - [H2O driverless](https://www.h2o.ai/products/h2o-driverless-ai)
 - [Kibana](https://www.elastic.co/es/products/kibana)
-
+- [DataRobot](https://www.datarobot.com)
 
 
 ## 0. API

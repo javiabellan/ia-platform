@@ -16,9 +16,17 @@ import TableColumnPlusBefore from 'mdi-material-ui/TableColumnPlusBefore';
 import ButtonDataSwitch from './ButtonDataSwitch.jsx';
 import DataTable        from './DataTable.jsx';
 
+// API
+import { getDataset }   from '../../../services/api';
 
-export default function ViewData({table})
+
+
+export default function ViewData({datasetID})
 {
+  // Get dataset data from API
+  const [dataset, updateDataset] = React.useState(undefined);
+  React.useEffect(() => {getDataset(datasetID, updateDataset);}, []);
+
 	return (
 	<div>
 		<Container maxWidth="lg">
@@ -34,13 +42,13 @@ export default function ViewData({table})
         </Box>
       </Box>
       
-
-      { table &&
+      {/*table={dataset? dataset.data : undefined}*/}
+      { dataset &&
         (
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Paper>
-                <DataTable table={table}/>
+                <DataTable table={dataset.data}/>
               </Paper>
             </Grid>
           </Grid>

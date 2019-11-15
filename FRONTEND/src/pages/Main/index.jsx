@@ -7,7 +7,6 @@ import SwipeableViews from 'react-swipeable-views';
 import useTheme   from '@material-ui/core/styles/useTheme';
 import Typography from '@material-ui/core/Typography';
 import AppBar     from '@material-ui/core/AppBar';
-import Toolbar    from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Tabs       from '@material-ui/core/Tabs';
 import Tab        from '@material-ui/core/Tab';
@@ -29,10 +28,6 @@ import ViewCharts      from './2-Charts/ViewCharts.jsx';
 import ViewModels      from './3-Models/ViewModels.jsx';
 import NewChart        from './2-Charts/NewChart.jsx';
 import NewModel        from './3-Models/NewModel.jsx';
-
-
-// API
-import { getDataset } from '../../services/api';
 
 
 
@@ -57,12 +52,16 @@ function TabPanel(props)
 
 export default function MainPage(props)
 { 
-  const theme     = useTheme();
+  // Obtain dataset metadata thanks to reach router Link state
+  const dsMetadata = props.location.state
+  const id   = dsMetadata.id
+  const name = dsMetadata.name
+  // const desc = dsMetadata.desc
+  // const date = dsMetadata.date
+  // const file = dsMetadata.file
+  // const size = dsMetadata.size
 
-  // Get dataset data & metadata from API
-  const datasetID = props.myDataset
-  const [dataset, updateDataset] = React.useState(undefined);
-  React.useEffect(() => {getDataset(datasetID, updateDataset);}, []);
+  const theme = useTheme();
 
   const [value, setValue] = React.useState(0);
 
@@ -77,18 +76,18 @@ export default function MainPage(props)
         <Grid container spacing={0}>
 
           {/**** LEFT: Back button & title ****/}
-          <Grid item xs >
-            <Toolbar>
+          <Grid item xs>
+            <Box display="flex" alignItems="center" pl={2} py={0.8}>
               <IconButton component={ Link } to="/"
                 edge="start" color="inherit" aria-label="back">
-                <ChevronLeft/>
+                <ChevronLeft fontSize="large"/>
               </IconButton>
-              <Typography variant="h5">{dataset? dataset.metadata.name : ''}</Typography>
-            </Toolbar>
+              <Typography variant="h6">{name}</Typography>
+            </Box>
           </Grid>
 
           {/**** CENTER: Navigation tabs ****/}
-          <Grid item xs={6} >
+          <Grid item sm={4} md={6}>
             <Tabs centered value={value} onChange={changeTab}>
               <Tab label="DATOS"    icon={<TableLarge/>} />
               <Tab label="GRÁFICAS" icon={<ChartAreasplineVariant/>} />
@@ -105,12 +104,12 @@ export default function MainPage(props)
 
       {/********************** PAGES **********************/}
       <SwipeableViews
-        axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
+        axis={theme.direction==='rtl' ? 'x-reverse' : 'x'}
         index={value} onChangeIndex={changeIndex}
       >
-        <TabPanel value={value} index={0}> <ViewData table={dataset? dataset.data : undefined}/>   </TabPanel>
-        <TabPanel value={value} index={1}> <ViewCharts datasetID={datasetID}/> </TabPanel>
-        <TabPanel value={value} index={2}> <ViewModels/> </TabPanel>
+        <TabPanel value={value} index={0}> <ViewData   datasetID={id}/> </TabPanel> 
+        <TabPanel value={value} index={1}> <ViewCharts datasetID={id}/> </TabPanel>
+        <TabPanel value={value} index={2}> <ViewModels datasetID={id}/> </TabPanel>
       </SwipeableViews>
 
 

@@ -55,6 +55,5 @@ export const getUnivariate = async (datasetId, updater) => {
 	const response = await fetch(API_VISUAL + "univariatechart?id=" + datasetId);
 	const result   = await response.json();
 	result.data = {"name": "table"};
-	console.log(result)
 	updater(result);
 };

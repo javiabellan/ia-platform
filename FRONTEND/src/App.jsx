@@ -30,7 +30,7 @@ export default function App() {
       <CssBaseline />
       <Router>
         <HomePage path="/" />
-        <MainPage path="/dataset/:myDataset" />
+        <MainPage path="/workspace" />
         {/*<SettingsPage path="/settings" */}
         {/*<LoginPage    path="/login"    */}
         {/*<RegisterPage path="/register" */}

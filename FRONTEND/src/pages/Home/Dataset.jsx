@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-export default function Dataset(atrs)
+export default function Dataset(dsMetadata)
 {
   const classes = useStyles();
 
@@ -43,24 +43,24 @@ export default function Dataset(atrs)
 
       {/**************** HEADER *****************/}
       <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-        {/**{atrs.icon}**/}
-        <Typography className={classes.title}>    {atrs.name} </Typography>
-        <Typography className={classes.subtitle}> {atrs.size} </Typography>
-        <Typography className={classes.subtitle}> {atrs.date} </Typography>
+        {/**{dsMetadata.icon}**/}
+        <Typography className={classes.title}>    {dsMetadata.name} </Typography>
+        <Typography className={classes.subtitle}> {dsMetadata.size} </Typography>
+        <Typography className={classes.subtitle}> {dsMetadata.date} </Typography>
       </ExpansionPanelSummary>
 
 
       {/**************** DETAILS *****************/}
       <ExpansionPanelDetails>
-        <Typography>{atrs.desc}</Typography>
+        <Typography>{dsMetadata.desc}</Typography>
       </ExpansionPanelDetails>
 
 
       {/**************** BUTTONS *****************/}
       {/*<Divider />*/}
       <ExpansionPanelActions>
-        <ButtonEraseDataset id={atrs.id} />
-        <Button component={ Link } to={`/dataset/${atrs.id}`}
+        <ButtonEraseDataset id={dsMetadata.id} />
+        <Button component={ Link } to={`/workspace`} state={dsMetadata}
           variant="contained" size="small" color="primary"> ANALIZAR </Button>
         
 

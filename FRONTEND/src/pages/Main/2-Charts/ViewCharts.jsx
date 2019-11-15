@@ -26,7 +26,7 @@ export default function ViewCharts({datasetID})
         <Chart title={"Densidades"}            img={"yellow-density"}/>
         <Chart title={"Diagramas de caja"}     img={"yellow-box"}/>
         <Chart title={"Puntos"}                img={"grey-scatter"}/>
-        <Chart title={"Burbujas"}              img={"grey-bubble"}/>
+        <Chart title={"Burbujas"}              img={"grey-scatterBubble"}/>
         <Chart title={"Densidades 2D"}         img={"grey-hex"}/>
         <Chart title={"Coordenadas paralelas"} img={"green-parallel"}/>
         <Chart title={"Gráfico radial"}        img={"green-radar"}/>

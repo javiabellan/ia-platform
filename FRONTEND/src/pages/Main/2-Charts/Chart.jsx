@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Dialog        from '@material-ui/core/Dialog';
 import DialogTitle   from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
+//import DialogActions from '@material-ui/core/DialogActions';
 
 
 // Vega plot library
@@ -23,7 +23,7 @@ export default function Chart({spec, data, title, img})
     <Grid item xs={6} sm={4} md={3} lg={2} style={{textAlign: "center"}}>
 
       <ButtonBase mx="auto" focusRipple onClick={() => setOpen(true)}>
-        <img src={require("./img150x150/"+img+".png")} />
+        <img src={require("./img150x150/"+img+".png")} alt="Chart icon" />
       </ButtonBase>
 
       <Typography variant="subtitle1" gutterBottom>

@@ -11,6 +11,7 @@
     "echarts-for-react": "^2.0.15-beta.0",
     "material-ui-dropzone": "^2.4.1",
     "mdi-material-ui": "^6.7.0",
+    "mui-datatables": "^2.12.4",
     "react": "^16.11.0",
     "react-dom": "^16.9.0",
     "react-router": "^5.1.2",
